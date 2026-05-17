@@ -119,6 +119,25 @@ async def validate_mapping_file(
     )
 
 
+# ── /parse-headers ────────────────────────────────────────────────────────────
+
+@router.post(
+    "/parse-headers",
+    summary="Parse column headers from an uploaded file",
+    tags=["Validation"],
+)
+async def parse_headers(
+    file: UploadFile = File(..., description="Data file to parse columns from (CSV/JSON/XML/PSV/XLSX)"),
+    sheet: Optional[str] = Form(None, description="Excel sheet name/index (Excel only)"),
+):
+    try:
+        content = await file.read()
+        df = parse_file(content, file.filename, sheet_name=_coerce_sheet(sheet))
+        return {"filename": file.filename, "columns": df.columns.tolist()}
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 # ── /report/{id} download endpoints ──────────────────────────────────────────
 
 @router.get(
