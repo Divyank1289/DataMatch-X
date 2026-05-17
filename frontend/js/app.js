@@ -3,7 +3,7 @@
  * Handles file uploads, API communication, results rendering, filtering, pagination
  */
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = CONFIG.API_BASE;
 const PAGE_SIZE = 20;
 
 // ── State ──────────────────────────────────────────────────────────────────
