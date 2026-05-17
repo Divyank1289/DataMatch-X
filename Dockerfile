@@ -19,5 +19,8 @@ COPY backend ./backend
 # Change working directory to backend so relative paths work (like sample_data)
 WORKDIR /app/backend
 
+# Expose the port Uvicorn is listening on (Railway routes traffic here)
+EXPOSE 3000
+
 # Run the FastAPI application explicitly using Python module mode to fix imports
 CMD ["python", "-m", "app.main"]
