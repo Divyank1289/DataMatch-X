@@ -19,5 +19,5 @@ COPY backend ./backend
 # Change working directory to backend so relative paths work (like sample_data)
 WORKDIR /app/backend
 
-# Run the FastAPI application explicitly using Python to capture PORT correctly
-CMD ["python", "app/main.py"]
+# Run the FastAPI application explicitly using Python module mode to fix imports
+CMD ["python", "-m", "app.main"]
