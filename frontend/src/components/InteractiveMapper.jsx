@@ -69,11 +69,11 @@ export default function InteractiveMapper({
     
     // Check for exact matching keys in both lists
     for (const pattern of keyPatterns) {
-      const srcMatch = sourceCols.find(c => c.toLowerCase() === pattern);
-      const tgtMatch = targetCols.find(c => c.toLowerCase() === pattern);
+      const srcMatch = sourceCols.find(c => String(c).toLowerCase() === pattern);
+      const tgtMatch = targetCols.find(c => String(c).toLowerCase() === pattern);
       if (srcMatch && tgtMatch) {
-        detectedSrcKey = srcMatch;
-        detectedTgtKey = tgtMatch;
+        detectedSrcKey = String(srcMatch);
+        detectedTgtKey = String(tgtMatch);
         break;
       }
     }
@@ -81,65 +81,69 @@ export default function InteractiveMapper({
     // Fallback: check matching columns that contain 'id' or 'key'
     if (!detectedSrcKey) {
       for (const pattern of keyPatterns) {
-        const srcMatch = sourceCols.find(c => c.toLowerCase().includes(pattern));
-        const tgtMatch = targetCols.find(c => c.toLowerCase().includes(pattern) && c.toLowerCase().replace(pattern, '') === srcMatch.toLowerCase().replace(pattern, ''));
-        if (srcMatch && tgtMatch) {
-          detectedSrcKey = srcMatch;
-          detectedTgtKey = tgtMatch;
-          break;
+        const srcMatch = sourceCols.find(c => String(c).toLowerCase().includes(pattern));
+        if (srcMatch) {
+          const tgtMatch = targetCols.find(c => {
+            const s = String(c).toLowerCase();
+            return s.includes(pattern) && s.replace(pattern, '') === String(srcMatch).toLowerCase().replace(pattern, '');
+          });
+          if (tgtMatch) {
+            detectedSrcKey = String(srcMatch);
+            detectedTgtKey = String(tgtMatch);
+            break;
+          }
         }
       }
     }
 
     // Default Fallback: First column
     if (!detectedSrcKey) {
-      detectedSrcKey = sourceCols[0] || '';
-      detectedTgtKey = targetCols[0] || '';
+      detectedSrcKey = String(sourceCols[0] || '');
+      detectedTgtKey = String(targetCols[0] || '');
     }
 
     // Helper to normalize column names for matching
-    const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normalize = (str) => String(str).toLowerCase().replace(/[^a-z0-9]/g, '');
 
     // 2. Map Columns
-    sourceCols.forEach((srcCol) => {
+    sourceCols.forEach((srcColRaw) => {
+      const srcCol = String(srcColRaw);
       // Don't map the join keys as ordinary columns
       if (srcCol === detectedSrcKey) return;
 
       const normSrc = normalize(srcCol);
 
       // Try exact case-insensitive match
-      let match = targetCols.find(t => t.toLowerCase() === srcCol.toLowerCase() && t !== detectedTgtKey);
+      let match = targetCols.find(t => String(t).toLowerCase() === srcCol.toLowerCase() && String(t) !== detectedTgtKey);
 
       // Try normalized match
       if (!match) {
-        match = targetCols.find(t => normalize(t) === normSrc && t !== detectedTgtKey);
+        match = targetCols.find(t => normalize(t) === normSrc && String(t) !== detectedTgtKey);
       }
 
       // Try containing match
       if (!match) {
-        match = targetCols.find(t => (normalize(t).includes(normSrc) || normSrc.includes(normalize(t))) && t !== detectedTgtKey);
+        match = targetCols.find(t => (normalize(t).includes(normSrc) || normSrc.includes(normalize(t))) && String(t) !== detectedTgtKey);
       }
 
-      if (match) {
-        // Detect rule automatically
-        let rule = 'exact';
-        let tolerance = null;
+      // Detect rule automatically
+      let rule = 'exact';
+      let tolerance = null;
 
-        // Auto-detect numeric fields for tolerance (e.g. salary, price, cost, amount)
-        const numericIndicators = ['salary', 'price', 'cost', 'amount', 'rate', 'val', 'balance'];
-        if (numericIndicators.some(ind => srcCol.toLowerCase().includes(ind))) {
-          rule = 'numeric_tolerance';
-          tolerance = 0.0;
-        }
-
-        mappedCols.push({
-          source: srcCol,
-          target: match,
-          rule: rule,
-          tolerance: tolerance,
-          pattern: '',
-        });
+      // Auto-detect numeric fields for tolerance (e.g. salary, price, cost, amount)
+      const numericIndicators = ['salary', 'price', 'cost', 'amount', 'rate', 'val', 'balance'];
+      if (numericIndicators.some(ind => srcCol.toLowerCase().includes(ind))) {
+        rule = 'numeric_tolerance';
+        tolerance = 0.0;
       }
+
+      mappedCols.push({
+        source: srcCol,
+        target: match ? String(match) : '',
+        rule: rule,
+        tolerance: tolerance,
+        pattern: '',
+      });
     });
 
     setMapping({
@@ -149,7 +153,8 @@ export default function InteractiveMapper({
       columns: mappedCols,
     });
 
-    onToast(`✨ Smart Auto-Mapped completed! Setup keys and paired ${mappedCols.length} columns!`, 'success');
+    const pairedCount = mappedCols.filter(c => c.target !== '').length;
+    onToast(`✨ Smart Auto-Map populated all ${mappedCols.length} columns (paired ${pairedCount} matching automatically)!`, 'success');
   };
 
   return (
