@@ -172,8 +172,12 @@ export default function App() {
       return;
     }
 
-    if (!mapping.columns || mapping.columns.length === 0) {
-      triggerToast('❌ Please map at least one column pairing!', 'error');
+    const cleanedCols = (mapping.columns || []).filter(
+      (col) => col.source && col.source.trim() && col.target && col.target.trim()
+    );
+
+    if (cleanedCols.length === 0) {
+      triggerToast('❌ Please map at least one complete column pairing (select a Target column)!', 'error');
       return;
     }
 
@@ -187,8 +191,14 @@ export default function App() {
     form.append('source', sourceFile);
     form.append('target', targetFile);
 
+    // Cleaned mapping payload to prevent backend validation crashes on empty columns
+    const cleanedMapping = {
+      ...mapping,
+      columns: cleanedCols
+    };
+
     // Create the mapping file as a JSON blob dynamically!
-    const mappingBlob = new Blob([JSON.stringify(mapping)], {
+    const mappingBlob = new Blob([JSON.stringify(cleanedMapping)], {
       type: 'application/json',
     });
     form.append('mapping', mappingBlob, 'mapping.json');
@@ -246,6 +256,16 @@ export default function App() {
       triggerToast('❌ Upload files first!', 'error');
       return;
     }
+
+    const cleanedCols = (mapping.columns || []).filter(
+      (col) => col.source && col.source.trim() && col.target && col.target.trim()
+    );
+
+    if (cleanedCols.length === 0) {
+      triggerToast('❌ Please map at least one complete column pairing (select a Target column)!', 'error');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -253,7 +273,12 @@ export default function App() {
     form.append('source', sourceFile);
     form.append('target', targetFile);
 
-    const mappingBlob = new Blob([JSON.stringify(mapping)], {
+    const cleanedMapping = {
+      ...mapping,
+      columns: cleanedCols
+    };
+
+    const mappingBlob = new Blob([JSON.stringify(cleanedMapping)], {
       type: 'application/json',
     });
     form.append('mapping', mappingBlob, 'mapping.json');
