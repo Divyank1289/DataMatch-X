@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataMatchX — Multi-Format Data Comparison Tool</title>
+  <meta name="description" content="DataMatchX: Upload CSV, JSON, XML, PSV or Excel files with a mapping definition and get instant, detailed data comparison reports." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙</text></svg>" />
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚙</div>
+    <span class="logo-text">DataMatchX</span>
+    <span class="logo-badge">v1.0</span>
+  </div>
+  <nav class="header-links">
+    <a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener">API Docs</a>
+    <a href="http://127.0.0.1:8000/health" target="_blank" rel="noopener">Health</a>
+    <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<main>
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <h1>Compare Data.<br/>Find Differences.<br/>Trust Your Data.</h1>
+    <p>Upload any two data files and a mapping definition to instantly see row-level and column-level differences with downloadable reports.</p>
+    <div class="supported-formats">
+      <span class="fmt-chip">CSV</span>
+      <span class="fmt-chip">JSON</span>
+      <span class="fmt-chip">XML</span>
+      <span class="fmt-chip">PSV</span>
+      <span class="fmt-chip">XLSX</span>
+      <span class="fmt-chip">XLS</span>
+    </div>
+  </section>
+
+  <!-- ── Upload Panel ── -->
+  <p class="section-title">Step 1 — Upload Files</p>
+  <div class="upload-panel">
+
+    <div class="upload-zone" id="sourceZone" role="button" aria-label="Upload source file" tabindex="0">
+      <input type="file" id="sourceInput" accept=".csv,.json,.xml,.psv,.xlsx,.xls" />
+      <span class="zone-icon">📂</span>
+      <div class="zone-label">Source File</div>
+      <div class="zone-hint">CSV, JSON, XML, PSV, XLSX</div>
+      <div class="zone-filename"></div>
+    </div>
+
+    <div class="upload-zone" id="targetZone" role="button" aria-label="Upload target file" tabindex="0">
+      <input type="file" id="targetInput" accept=".csv,.json,.xml,.psv,.xlsx,.xls" />
+      <span class="zone-icon">🎯</span>
+      <div class="zone-label">Target File</div>
+      <div class="zone-hint">CSV, JSON, XML, PSV, XLSX</div>
+      <div class="zone-filename"></div>
+    </div>
+
+    <div class="upload-zone" id="mappingZone" role="button" aria-label="Upload mapping file" tabindex="0">
+      <input type="file" id="mappingInput" accept=".json" />
+      <span class="zone-icon">🗺</span>
+      <div class="zone-label">Mapping File</div>
+      <div class="zone-hint">JSON column mapping definition</div>
+      <div class="zone-filename"></div>
+    </div>
+
+  </div>
+
+  <!-- ── Options ── -->
+  <p class="section-title">Step 2 — Options</p>
+  <div class="options-panel">
+    <div class="option-group">
+      <label for="sourceSheet">Source Sheet (Excel only)</label>
+      <input type="text" id="sourceSheet" placeholder="0 or sheet name" />
+    </div>
+    <div class="option-group">
+      <label for="targetSheet">Target Sheet (Excel only)</label>
+      <input type="text" id="targetSheet" placeholder="0 or sheet name" />
+    </div>
+  </div>
+
+  <!-- ── Actions ── -->
+  <p class="section-title">Step 3 — Run</p>
+  <div class="actions">
+    <button class="btn btn-primary" id="compareBtn" disabled>
+      ⚡ Run Comparison
+    </button>
+    <button class="btn btn-secondary" id="validateBtn" disabled>
+      ✓ Validate Mapping
+    </button>
+    <button class="btn btn-secondary" id="resetBtn">
+      🔄 Reset
+    </button>
+  </div>
+
+  <!-- ── Error Box ── -->
+  <div class="error-box" id="errorBox" role="alert">
+    <h4 id="errorTitle">Error</h4>
+    <p id="errorMsg"></p>
+  </div>
+
+  <!-- ── Loading ── -->
+  <div class="loading-overlay" id="loadingOverlay" aria-live="polite">
+    <div class="spinner"></div>
+    <div class="loading-text">Processing your files…</div>
+    <div class="loading-steps">
+      <span class="step-chip">Parsing</span>
+      <span class="step-chip">Mapping</span>
+      <span class="step-chip">Comparing</span>
+      <span class="step-chip">Building Report</span>
+    </div>
+  </div>
+
+  <!-- ── Summary Stats ── -->
+  <div class="results-section" id="resultsSection">
+    <p class="section-title">Results</p>
+    <div id="reportMeta" style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;font-family:'JetBrains Mono',monospace;"></div>
+
+    <div class="stats-grid">
+      <div class="stat-card" id="statMatched">
+        <div class="stat-icon">✓</div>
+        <div class="stat-value">—</div>
+        <div class="stat-label">Matched Rows</div>
+      </div>
+      <div class="stat-card" id="statMismatched">
+        <div class="stat-icon">✗</div>
+        <div class="stat-value">—</div>
+        <div class="stat-label">Mismatched Rows</div>
+      </div>
+      <div class="stat-card" id="statSrcOnly">
+        <div class="stat-icon">◈</div>
+        <div class="stat-value">—</div>
+        <div class="stat-label">Source Only</div>
+      </div>
+      <div class="stat-card" id="statTgtOnly">
+        <div class="stat-icon">◆</div>
+        <div class="stat-value">—</div>
+        <div class="stat-label">Target Only</div>
+      </div>
+      <div class="stat-card" id="statRate">
+        <div class="stat-icon">⬡</div>
+        <div class="stat-value">—</div>
+        <div class="stat-label">Match Rate</div>
+      </div>
+      <div class="stat-card" id="statCols">
+        <div class="stat-icon">⊞</div>
+        <div class="stat-value">—</div>
+        <div class="stat-label">Cols Compared</div>
+      </div>
+    </div>
+
+    <!-- ── Results Table ── -->
+    <div class="results-toolbar">
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all" id="tabAll">All <span class="tab-count">0</span></button>
+        <button class="filter-tab" data-filter="mismatch" id="tabMismatch">Mismatch <span class="tab-count">0</span></button>
+        <button class="filter-tab" data-filter="match" id="tabMatch">Match <span class="tab-count">0</span></button>
+        <button class="filter-tab" data-filter="source_only" id="tabSrcOnly">Source Only <span class="tab-count">0</span></button>
+        <button class="filter-tab" data-filter="target_only" id="tabTgtOnly">Target Only <span class="tab-count">0</span></button>
+      </div>
+      <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+        <input class="results-search" id="searchInput" type="search" placeholder="🔍 Search key or value…" aria-label="Search results" />
+        <div class="download-btns">
+          <button class="btn btn-secondary btn-sm" id="dlCsv" disabled>⬇ CSV</button>
+          <button class="btn btn-secondary btn-sm" id="dlHtml" disabled>⬇ HTML</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th data-col="key" style="width:15%">Key <span class="sort-arrow">↕</span></th>
+            <th data-col="status" style="width:15%">Status <span class="sort-arrow">↕</span></th>
+            <th>Column Differences</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody">
+          <tr><td colspan="3">
+            <div class="empty-state">
+              <div class="empty-icon">📊</div>
+              <h3>No comparison run yet</h3>
+              <p>Upload your files above and click <strong>Run Comparison</strong>.</p>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <div id="paginationBtns" style="display:flex;gap:.4rem;align-items:center;"></div>
+        <span class="page-info" id="paginationInfo"></span>
+      </div>
+    </div>
+
+  </div><!-- /results-section -->
+
+</main>
+
+<!-- ── Footer ── -->
+<footer>
+  <p>DataMatchX — Built with <a href="https://fastapi.tiangolo.com" target="_blank" rel="noopener">FastAPI</a> + pandas &amp; Vanilla JS &nbsp;|&nbsp; <a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener">API Docs</a></p>
+</footer>
+
+<!-- ── Toast Container ── -->
+<div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
