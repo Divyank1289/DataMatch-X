@@ -128,11 +128,12 @@ def to_html(response: CompareResponse) -> str:
                         diffs_html += f"<div class='diff-detail'>{_esc(d.detail)}</div>"
                     diffs_html += "</div>"
 
+        match_html = '<span style="color:#22c55e">✓ All match</span>'
         rows_html_parts.append(
             f"<tr>"
             f"<td>{_esc(str(row.key))}</td>"
             f"<td><span class='badge badge-{row.status}'>{row.status.replace('_',' ').title()}</span></td>"
-            f"<td>{diffs_html or '<span style=\"color:#22c55e\">✓ All match</span>'}</td>"
+            f"<td>{diffs_html or match_html}</td>"
             f"</tr>"
         )
 
