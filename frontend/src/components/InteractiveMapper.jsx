@@ -207,7 +207,7 @@ export default function InteractiveMapper({
       {/* Column Pairings List */}
       <div className="columns-mapping-section">
         {mapping.columns.map((col, idx) => (
-          <div key={idx} className="mapper-row-item">
+          <div key={idx} className={`mapper-row-item ${!col.target ? 'unmapped-row' : ''}`}>
             <div className="mapper-row-inputs">
               {/* Source Column Dropdown */}
               <div className="mapper-field">
@@ -295,13 +295,21 @@ export default function InteractiveMapper({
               </div>
             </div>
 
-            <button
-              className="mapper-row-delete-btn"
-              onClick={() => deleteRow(idx)}
-              title="Delete mapping row"
-            >
-              <Trash2 size={16} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              {!col.target && (
+                <span className="unmapped-tag" title="This column is not mapped yet! Select a Target Column to compare this field.">
+                  ⚠️ Unmapped
+                </span>
+              )}
+
+              <button
+                className="mapper-row-delete-btn"
+                onClick={() => deleteRow(idx)}
+                title="Delete mapping row"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
