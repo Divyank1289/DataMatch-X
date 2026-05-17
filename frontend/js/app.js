@@ -4,6 +4,8 @@
  */
 
 const API_BASE = CONFIG.API_BASE;
+console.log("🚀 DataMatchX Initialized. API_BASE is configured to:", API_BASE);
+console.log("🌍 Current window.location.hostname:", window.location.hostname);
 const PAGE_SIZE = 20;
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -99,6 +101,7 @@ async function runComparison() {
   animateLoadingSteps();
 
   try {
+    console.log(`📡 Sending POST request to: ${API_BASE}/compare`);
     const res = await fetch(`${API_BASE}/compare`, { method: 'POST', body: form });
     const data = await res.json();
 
@@ -143,6 +146,7 @@ async function runValidation() {
   form.append('mapping', state.files.mapping);
 
   try {
+    console.log(`📡 Sending POST request to: ${API_BASE}/validate`);
     const res = await fetch(`${API_BASE}/validate`, { method: 'POST', body: form });
     const data = await res.json();
 
