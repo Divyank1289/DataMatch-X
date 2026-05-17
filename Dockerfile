@@ -14,6 +14,6 @@ COPY backend ./backend
 
 WORKDIR /app/backend
 
-EXPOSE 3000
-
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-3000}"]
+# Start Uvicorn directly, allowing Railway's PORT env var to dictate the port.
+# Also enable proxy headers since we are behind Railway's edge proxy.
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips="*"
