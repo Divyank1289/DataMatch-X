@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "DataMatchX"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = True
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:5500,http://localhost:5500,null"
+    ALLOWED_ORIGINS: str = "*"
     MAX_UPLOAD_SIZE_MB: int = 50
     REPORT_STORE_DIR: str = "./reports"
 

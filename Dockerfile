@@ -19,5 +19,8 @@ COPY backend ./backend
 # Change working directory to backend so relative paths work (like sample_data)
 WORKDIR /app/backend
 
-# Run the FastAPI application
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Expose port (Railway overrides PORT env var but reads this)
+EXPOSE 8000
+
+# Run the FastAPI application binding to :: for IPv4/IPv6 dual-stack
+CMD uvicorn app.main:app --host :: --port ${PORT:-8000}
